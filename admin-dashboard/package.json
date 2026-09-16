@@ -9,7 +9,8 @@
   "dependencies": {
     "next": "^14.2.0",
     "react": "^18.3.0",
-    "react-dom": "^18.3.0"
+    "react-dom": "^18.3.0",
+    "jspdf": "^2.5.1"
   },
   "devDependencies": {
     "tailwindcss": "^3.4.0",

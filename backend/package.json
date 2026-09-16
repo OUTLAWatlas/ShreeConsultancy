@@ -1,0 +1,25 @@
+{
+  "name": "shree-consultancy-backend",
+  "private": true,
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "seed": "node prisma/seed.js",
+    "create-admin": "node scripts/create-admin-user.js"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "bcryptjs": "^2.4.3",
+    "@prisma/client": "^5.19.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.19.0"
+  }
+}

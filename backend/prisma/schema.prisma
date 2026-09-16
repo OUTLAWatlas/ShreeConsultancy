@@ -1,0 +1,98 @@
+// Postgres schema for the admin dashboard's data.
+//
+// Run after setting DATABASE_URL in .env:
+//   npx prisma migrate dev --name init
+//   npx prisma db seed
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// A project moving through the pipeline. Also doubles as the record for a
+// lead straight off the public site's intake form (source: "lead-form")
+// or a converted tender (source: "tender") — both land here in the
+// "New Leads" stage, matching the original lifecycle design.
+model Project {
+  id                Int           @id @default(autoincrement())
+  title             String
+  client            String
+  discipline        String
+  stage             String        @default("New Leads")
+  value             Int
+  blocked           Boolean       @default(false)
+  source            String        @default("manual") // manual | lead-form | tender
+  contactName       String?
+  contactEmail      String?
+  contactCompany    String?
+  sqft              Int?
+  proposalGenerated Boolean       @default(false)
+  invoiceGenerated  Boolean       @default(false)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  ledgerEntries     LedgerEntry[]
+  invoice           Invoice?
+}
+
+model LedgerEntry {
+  id        Int      @id @default(autoincrement())
+  projectId Int
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  item      String
+  amount    Int
+  createdAt DateTime @default(now())
+}
+
+// Populated by the standalone tender-scraper service (see
+// /automations/tender-scraper) via the token-protected automation API,
+// or entered manually.
+model Tender {
+  id         Int      @id @default(autoincrement())
+  source     String
+  title      String
+  location   String
+  estValue   Int
+  deadline   DateTime
+  status     String   @default("new") // new | archived | converted
+  // Dedup key the scraper derives from each portal listing (e.g. its URL
+  // or listing ID) so re-running the scraper doesn't create duplicates.
+  externalId String?  @unique
+  createdAt  DateTime @default(now())
+}
+
+model Invoice {
+  id             Int       @id @default(autoincrement())
+  projectId      Int       @unique
+  project        Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  amount         Int
+  status         String    @default("draft") // draft | sent | overdue | paid
+  dueDate        DateTime
+  remindersSent  Int       @default(0)
+  lastReminderAt DateTime?
+  createdAt      DateTime  @default(now())
+}
+
+model TeamMember {
+  id         Int    @id @default(autoincrement())
+  name       String
+  role       String
+  credential String
+  discipline String
+  draftsmen  Int    @default(0)
+}
+
+// Real login accounts for the admin dashboard — separate from
+// TeamMember (which is org-chart display data, not credentials).
+// Created/updated via `npm run create-admin`, not seeded with a default
+// password, so no known credentials ever ship with this codebase.
+model AdminUser {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+}

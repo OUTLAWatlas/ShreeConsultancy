@@ -4,50 +4,109 @@ A separate Next.js app, deployed independently to `admin.shreeconsultancy.com`.
 The public site never contains any of this code, at build time or runtime —
 it's a different deployment entirely.
 
+**This app holds no database connection.** All data lives in the
+standalone `backend` service (see `/backend`); this app's own API routes
+are thin proxies that check the browser's session cookie, then forward
+the request to `backend` with a server-to-server key. See "How auth
+crosses the two services" below for why it's split this way.
+
 ## Setup
 ```
 npm install
-cp .env.local.example .env.local   # set a real SESSION_SECRET
-openssl rand -hex 32               # generates a good value for it
-npm run dev                        # runs on :3001 by default
+cp .env.local.example .env.local
+
+openssl rand -hex 32        # → SESSION_SECRET
+# BACKEND_API_KEY must be the exact same value set in backend/.env
 ```
 
+Admin accounts are not configured here — create one in `backend`:
+```
+cd ../backend && npm run create-admin -- you@example.com "your password" "Your Name"
+```
+
+```
+npm run dev                 # runs on :3001 by default
+```
+
+This needs `backend` running too (see `/backend/README.md`) — every tab,
+and login itself, reads through it.
+
+Sign in at `/login` with the email and password you just created.
+
+## Tabs
+- **Pipeline** (`/dashboard`) — Kanban board. Drag cards between stages,
+  toggle **blocked**, click a card for its detail drawer. The stats strip
+  above the board is computed from live data fetched through `backend`.
+- **Project detail drawer** — ledger entries persist via `backend`. The
+  **Document Engine** still generates PDFs client-side via `jspdf`;
+  marking a document generated is saved server-side, and generating the
+  Final Invoice creates a real invoice record that shows up on the
+  Invoices tab. **Send to Client** now sends a real email via `backend`
+  (Resend) — the recipient defaults to the project's contact email if it
+  has one (leads from the intake form do; manually-created or
+  tender-converted projects don't, so you'll need to fill it in), and can
+  optionally attach whichever PDF was just generated in this session.
+- **Tender Inbox** (`/tenders`) — **Convert** creates a project and marks
+  the tender converted, both persisted through `backend`.
+- **Invoices** (`/invoices`) — **Mark paid** persists. Reminder counts
+  come from the dunning service, via `backend`.
+- **Team** (`/team`) — read-only.
+
+## How auth crosses the two services
+
+The browser only ever talks to this app — never directly to `backend`.
+That's deliberate: the `admin_session` cookie is scoped to this subdomain
+only (no `domain` attribute, same as before), so it can't leak to the
+public site or be sent anywhere else, even by mistake. Widening that
+cookie's scope so the browser could call `backend` directly would have
+undone exactly the isolation the two-app split was built to guarantee.
+
+Instead: this app's API routes check the session cookie themselves
+(`lib/requireSession.js`), then make their own server-to-server request
+to `backend` with a static `x-api-key` header (`lib/backendClient.js`).
+`backend` trusts that key, not the browser — it has no idea what a
+session cookie even is.
+
 ## How the pieces fit together
-- `middleware.js` — checks every request except `/login` and `/api/auth/*`
-  for a valid `admin_session` cookie. No valid session → redirect to
-  `/login`. Runs on the Edge runtime.
-- `app/api/auth/login/route.js` — verifies credentials (currently a stub —
-  see below) and, on success, sets an `httpOnly`, `secure` session cookie.
-  No `domain` attribute is set, so the cookie is scoped to this subdomain
-  only and is never visible to the public site, even in principle.
-- `app/api/auth/logout/route.js` — clears the cookie.
-- `app/dashboard/page.jsx` — the protected page. Reads the session
-  server-side to know who's signed in.
-- `lib/session.js` — signs and verifies the session token with HMAC-SHA256
-  via the Web Crypto API, so the same code runs in both the Edge middleware
-  and the Node API routes.
+- `middleware.js` — checks every request except `/login` and
+  `/api/auth/*` for a valid `admin_session` cookie. Edge runtime.
+- `lib/session.js` — signs and verifies that cookie.
+- `lib/requireSession.js` — the in-handler session check every API route
+  calls before it does anything.
+- `lib/backendClient.js` — the one place `BACKEND_URL`/`BACKEND_API_KEY`
+  are used; every proxy route and every server-rendered page goes through
+  this instead of calling `fetch` directly.
+- `app/api/projects`, `/tenders`, `/invoices`, `/team` — thin proxies:
+  check session, forward to `backend`, return its response.
+- `app/api/auth/login/route.js` — rate-limits per email locally, then
+  calls `backend`'s `/auth/verify` to check the credentials against the
+  real `AdminUser` table, and issues the session cookie on success. This
+  is the one route that has to stay here rather than moving entirely to
+  `backend`, since issuing the cookie is inseparable from the browser
+  request that arrives here.
+- `app/api/dispatch/route.js` — thin proxy, same pattern as the other
+  routes: checks session, forwards to `backend`'s `/dispatch`, which
+  sends the real email.
 
-## Before you put real data behind this
-Two things in here are placeholders, on purpose:
+## What's still a placeholder, on purpose
 
-1. **`verifyCredentials()` in `app/api/auth/login/route.js` always returns
-   `null`.** Wire it to your actual user store — look up the user by email,
-   compare the password with `bcrypt.compare` (never plaintext), and return
-   the user record on success.
-
-2. **`lib/session.js` is a minimal reference implementation**, not an
-   audited auth library. It correctly signs and verifies cookies and checks
-   expiry, but it doesn't give you session revocation (there's no way to
-   invalidate a token before it expires short of rotating `SESSION_SECRET`
-   for everyone), CSRF protection, or login rate-limiting. For a real
-   deployment, consider swapping this for **Auth.js (next-auth)** or
-   **iron-session** — both are maintained, widely audited, and handle these
-   cases for you. Keeping the hand-rolled version is fine for a low-value
-   internal tool used by one person, but worth revisiting if the dashboard
-   ever handles client-sensitive data at scale.
+1. **No self-service password reset or roles yet.** Every `AdminUser` can
+   do everything — there's no "read-only" or "billing-only" role. Adding
+   one means adding a `role` column and checking it in `backend`'s
+   routes; the schema deliberately doesn't guess at what roles you'll
+   actually need yet.
+2. **No file storage.** Generated PDFs only exist in the browser and, for
+   the length of one dispatch request, in transit to Resend — they
+   aren't saved anywhere. Reopening a project's drawer later means
+   regenerating a document before you can email it again. CAD files
+   still need S3/R2 entirely from scratch.
+3. **The two in-memory rate limiters** (login here, leads in `backend`)
+   reset on restart and don't share state across multiple instances.
 
 ## Deploying
-Deploy this as its own project (e.g. a second Vercel project pointed at the
-same repo but this subdirectory, or its own repo entirely). Add
-`admin.shreeconsultancy.com` as its domain and set `SESSION_SECRET` in the
-host's environment settings — don't commit it.
+Deploy this as its own project (e.g. a Vercel project pointed at this
+subdirectory). Set `SESSION_SECRET`, `BACKEND_URL` (the deployed
+backend's URL), and `BACKEND_API_KEY` (matching backend's own env) in
+the host's environment settings. Create the first real login by running
+`npm run create-admin` against the deployed backend's database (or
+locally with `DATABASE_URL` pointed at production, for a one-off).

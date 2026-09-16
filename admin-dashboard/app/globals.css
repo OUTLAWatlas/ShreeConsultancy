@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: #0d0d0d;
+  color: #ffffff;
+}
+
+::selection {
+  background: #00e5ff33;
+}
+
+/* Tabular numerals everywhere money or counts appear — this is a
+   workbench, not a brochure. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 1px solid #00e5ff;
+  outline-offset: 2px;
+}
+
+/* Thin dark scrollbar for the pipeline board, instead of the default
+   chunky light one — this only ever shows on viewports too narrow to fit
+   all six lanes at once. */
+.board-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #ffffff26 transparent;
+}
+.board-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.board-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.board-scroll::-webkit-scrollbar-thumb {
+  background: #ffffff26;
+}
+.board-scroll::-webkit-scrollbar-thumb:hover {
+  background: #ffffff40;
+}

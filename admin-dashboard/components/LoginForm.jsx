@@ -33,7 +33,7 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0D0D0D] font-mono text-white">
+    <div className="flex min-h-screen items-center justify-center bg-ink font-mono text-white">
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 px-6">
         <p className="text-sm text-white/60">shree-consultancy / admin — sign in</p>
         <input
@@ -42,7 +42,7 @@ export default function LoginForm() {
           placeholder="email"
           value={credentials.email}
           onChange={(e) => setCredentials((c) => ({ ...c, email: e.target.value }))}
-          className="w-full border border-white/15 bg-transparent px-3 py-2 text-sm placeholder:text-white/30 focus:border-[#00E5FF] focus:outline-none"
+          className="w-full border border-white/15 bg-transparent px-3 py-2 text-sm placeholder:text-white/30 focus:border-cyan focus:outline-none"
         />
         <input
           required
@@ -50,13 +50,13 @@ export default function LoginForm() {
           placeholder="password"
           value={credentials.password}
           onChange={(e) => setCredentials((c) => ({ ...c, password: e.target.value }))}
-          className="w-full border border-white/15 bg-transparent px-3 py-2 text-sm placeholder:text-white/30 focus:border-[#00E5FF] focus:outline-none"
+          className="w-full border border-white/15 bg-transparent px-3 py-2 text-sm placeholder:text-white/30 focus:border-cyan focus:outline-none"
         />
-        {error && <p className="text-xs text-[#FF7B00]">{error}</p>}
+        {error && <p className="text-xs text-amber">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full border border-[#00E5FF]/50 px-3 py-2 text-sm text-[#00E5FF] hover:bg-[#00E5FF]/10 disabled:opacity-50"
+          className="w-full border border-cyan/50 px-3 py-2 text-sm text-cyan hover:bg-cyan/10 disabled:opacity-50"
         >
           {loading ? 'signing in…' : 'sign in'}
         </button>

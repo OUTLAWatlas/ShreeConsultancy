@@ -1,17 +1,35 @@
 import { NextResponse } from 'next/server';
 import { createSessionToken } from '../../../../lib/session';
+import { backendFetch } from '../../../../lib/backendClient';
 
-// STUB — replace with a real lookup against your user store.
-// Passwords must be hashed at rest and compared with a constant-time
-// comparison (e.g. bcrypt.compare), never checked in plaintext.
+// Credentials are checked against the real AdminUser table in `backend`
+// (see backend/src/routes/auth.js), not against env vars — accounts are
+// created/reset with `npm run create-admin` in the backend folder, which
+// means real per-person accounts and password changes with no redeploy.
 //
-// Example once wired up:
-//   const user = await db.user.findUnique({ where: { email } });
-//   if (!user) return null;
-//   const valid = await bcrypt.compare(password, user.passwordHash);
-//   return valid ? user : null;
-async function verifyCredentials(email, password) {
-  return null; // always rejects until this is implemented
+// This route still owns the session cookie itself, on purpose: it's the
+// one piece of "auth" that has to live here rather than in `backend`,
+// since issuing the cookie is inseparable from the browser request that
+// arrives here.
+
+// Extremely simple in-memory rate limit: 5 attempts per email per 10
+// minutes. Resets on server restart and doesn't share state across
+// serverless instances — good enough to slow down casual brute-forcing on
+// a single-instance deployment, not a substitute for a real solution
+// (e.g. Upstash rate limiting) if this ever sits behind heavier traffic.
+const attempts = new Map();
+const WINDOW_MS = 10 * 60 * 1000;
+const MAX_ATTEMPTS = 5;
+
+function isRateLimited(key) {
+  const now = Date.now();
+  const record = attempts.get(key);
+  if (!record || now - record.windowStart > WINDOW_MS) {
+    attempts.set(key, { count: 1, windowStart: now });
+    return false;
+  }
+  record.count += 1;
+  return record.count > MAX_ATTEMPTS;
 }
 
 export async function POST(request) {
@@ -26,12 +44,27 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
   }
 
-  const user = await verifyCredentials(email, password);
-  if (!user) {
-    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+  if (isRateLimited(email.toLowerCase())) {
+    return NextResponse.json(
+      { error: 'Too many attempts. Try again in a few minutes.' },
+      { status: 429 }
+    );
   }
 
-  const token = await createSessionToken({ sub: user.id, email: user.email });
+  const { data, status } = await backendFetch('/auth/verify', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (status !== 200) {
+    return NextResponse.json({ error: data.error || 'Invalid credentials' }, { status: status || 401 });
+  }
+
+  const token = await createSessionToken({
+    sub: data.user.id,
+    email: data.user.email,
+    name: data.user.name,
+  });
 
   const response = NextResponse.json({ ok: true });
   response.cookies.set('admin_session', token, {

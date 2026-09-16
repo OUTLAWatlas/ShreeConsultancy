@@ -1,0 +1,19 @@
+# Postgres for local development only. Nothing else in this repo runs in
+# Docker via this file — backend/, admin-dashboard/, and public-site/ all
+# still run with plain `npm run dev`. In production, point DATABASE_URL
+# at a managed Postgres (Supabase, Neon, RDS, etc.) instead of this.
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: shree_consultancy
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
