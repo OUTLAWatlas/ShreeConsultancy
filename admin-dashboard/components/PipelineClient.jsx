@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { formatINR } from '../lib/mockData';
 import PipelineBoard from './PipelineBoard';
 import ProjectDrawer from './ProjectDrawer';
+import NewProjectModal from './NewProjectModal';
 
 // Prisma's shape (ledgerEntries, proposalGenerated, invoiceGenerated) is
 // translated to the shape the board/drawer components already expect
@@ -19,7 +20,7 @@ function toClientShape(p) {
     blocked: p.blocked,
     discipline: p.discipline,
     contactEmail: p.contactEmail || '',
-    ledger: p.ledgerEntries.map((e) => ({ id: e.id, item: e.item, amount: e.amount })),
+    ledger: (p.ledgerEntries || []).map((e) => ({ id: e.id, item: e.item, amount: e.amount })),
     documents: { proposal: p.proposalGenerated, invoice: p.invoiceGenerated },
   };
 }
@@ -28,6 +29,7 @@ export default function PipelineClient({ initialProjects }) {
   const [projects, setProjects] = useState(initialProjects.map(toClientShape));
   const [selectedId, setSelectedId] = useState(null);
   const [syncError, setSyncError] = useState('');
+  const [showNewProject, setShowNewProject] = useState(false);
 
   const selectedProject = projects.find((p) => p.id === selectedId) || null;
 
@@ -102,6 +104,10 @@ export default function PipelineClient({ initialProjects }) {
     patchProject(projectId, { [field]: true });
   }
 
+  function addProject(project) {
+    setProjects((prev) => [toClientShape(project), ...prev]);
+  }
+
   return (
     <div className="-m-6">
       {syncError && (
@@ -109,6 +115,16 @@ export default function PipelineClient({ initialProjects }) {
           {syncError}
         </p>
       )}
+
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
+        <p className="text-xs tracking-wide text-white/40">Pipeline</p>
+        <button
+          onClick={() => setShowNewProject(true)}
+          className="border border-white/15 px-2 py-1 text-xs text-white/60 hover:border-cyan/50 hover:text-cyan"
+        >
+          + new project
+        </button>
+      </div>
 
       <div className="grid grid-cols-2 gap-px bg-white/10 sm:grid-cols-4">
         <Stat label="Open projects" value={openProjects.length} />
@@ -134,6 +150,10 @@ export default function PipelineClient({ initialProjects }) {
         onAddLedgerItem={addLedgerItem}
         onMarkDocument={markDocument}
       />
+
+      {showNewProject && (
+        <NewProjectModal onClose={() => setShowNewProject(false)} onCreated={addProject} />
+      )}
     </div>
   );
 }
