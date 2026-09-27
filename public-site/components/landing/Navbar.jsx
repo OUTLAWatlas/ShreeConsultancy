@@ -5,8 +5,7 @@ import { useTripleClickLogo } from '../../hooks/useTripleClickLogo';
 
 // Set NEXT_PUBLIC_ADMIN_URL in .env.local / your host's env settings.
 // Falls back to the production subdomain if unset.
-const ADMIN_URL = process.env.NEXT_PUBLIC_ADMIN_URL || 'https://admin.shreeconsultancy.com';
-
+const ADMIN_URL = process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:3001';
 const LINKS = [
   { href: '#services', label: 'Services' },
   { href: '#team', label: 'Team' },
