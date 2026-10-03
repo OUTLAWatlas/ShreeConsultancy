@@ -1,6 +1,52 @@
+/* Font import must come before the Tailwind directives — @import is only
+   valid at the top of a stylesheet. */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ---------------------------------------------------------------------
+   THEME TOKENS
+
+   Every colour in this app resolves through one of these variables. They
+   are stored as bare "R G B" triplets (not hex, not rgb()) because
+   tailwind.config.js wraps them in rgb(... / <alpha-value>) — that is
+   what makes opacity modifiers like text-fg/60 keep working.
+
+   The light palette is deliberately NOT an inversion of the dark one.
+   Pure white under a monospace workbench UI reads like a generic SaaS
+   dashboard, so the page sits on warm drafting-paper off-white, panels
+   are the only true white, and both accents are darkened until they are
+   actually legible on a light background — #00E5FF on white fails
+   contrast badly, so light mode uses a deep teal instead.
+
+   Light is the default (the brief asked for a light-first UI); dark is
+   opt-in via the toggle. See lib/theme.js.
+   --------------------------------------------------------------------- */
+
+:root,
+:root[data-theme='light'] {
+  --bg: 244 242 237; /* warm drafting paper */
+  --surface: 255 255 255;
+  --surface-hover: 250 249 246;
+  --fg: 20 20 20;
+  --accent: 10 110 138; /* deep teal — the light-mode stand-in for cyan */
+  --warn: 179 90 0; /* burnt amber, legible on paper */
+  --glow: 10 110 138;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: 13 13 13;
+  --surface: 20 20 20;
+  --surface-hover: 26 26 26;
+  --fg: 255 255 255;
+  --accent: 0 229 255;
+  --warn: 255 123 0;
+  --glow: 0 229 255;
+  color-scheme: dark;
+}
 
 * {
   box-sizing: border-box;
@@ -8,12 +54,28 @@
 
 html,
 body {
-  background-color: #0d0d0d;
-  color: #ffffff;
+  background-color: rgb(var(--bg));
+  color: rgb(var(--fg));
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Colour changes shouldn't strobe when the theme flips, but we scope the
+   transition to colours only — transitioning "all" would drag layout
+   properties into it and make the whole UI feel laggy. */
+html.theme-ready body,
+html.theme-ready body * {
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-ready body,
+  html.theme-ready body * {
+    transition: none;
+  }
 }
 
 ::selection {
-  background: #00e5ff33;
+  background: rgb(var(--accent) / 0.18);
 }
 
 /* Tabular numerals everywhere money or counts appear — this is a
@@ -24,17 +86,25 @@ body {
 
 input:focus-visible,
 button:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
 a:focus-visible {
-  outline: 1px solid #00e5ff;
+  outline: 1px solid rgb(var(--accent));
   outline-offset: 2px;
 }
 
-/* Thin dark scrollbar for the pipeline board, instead of the default
-   chunky light one — this only ever shows on viewports too narrow to fit
-   all six lanes at once. */
+/* Native dropdown popups render with OS defaults otherwise, which means a
+   white list on a dark page. */
+select option {
+  background-color: rgb(var(--surface));
+  color: rgb(var(--fg));
+}
+
+/* Thin themed scrollbar for the pipeline board, instead of the default
+   chunky light one. Only appears on viewports too narrow for six lanes. */
 .board-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #ffffff26 transparent;
+  scrollbar-color: rgb(var(--fg) / 0.22) transparent;
 }
 .board-scroll::-webkit-scrollbar {
   height: 6px;
@@ -43,8 +113,8 @@ a:focus-visible {
   background: transparent;
 }
 .board-scroll::-webkit-scrollbar-thumb {
-  background: #ffffff26;
+  background: rgb(var(--fg) / 0.22);
 }
 .board-scroll::-webkit-scrollbar-thumb:hover {
-  background: #ffffff40;
+  background: rgb(var(--fg) / 0.35);
 }

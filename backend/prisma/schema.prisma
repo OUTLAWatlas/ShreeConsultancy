@@ -36,6 +36,7 @@ model Project {
   updatedAt         DateTime      @updatedAt
   ledgerEntries     LedgerEntry[]
   invoice           Invoice?
+  files             ProjectFile[]
 }
 
 model LedgerEntry {
@@ -94,5 +95,25 @@ model AdminUser {
   email        String   @unique
   passwordHash String
   name         String?
+  // 'admin' can do everything; 'viewer' can read every tab but cannot
+  // change anything. Enforced server-side in backend (see
+  // src/middleware/requireWriteAccess.js) and mirrored in the dashboard
+  // UI, which hides write controls rather than letting them 403.
+  role         String   @default("admin")
   createdAt    DateTime @default(now())
+}
+
+// A file living in S3-compatible object storage (AWS S3 or Cloudflare R2 —
+// same API, see src/storage.js), not in Postgres. `key` is the object's
+// path in the bucket; the rest is metadata for listing and attaching.
+model ProjectFile {
+  id          Int      @id @default(autoincrement())
+  projectId   Int
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  filename    String
+  key         String
+  contentType String
+  size        Int
+  kind        String // 'cad' | 'proposal' | 'invoice'
+  createdAt   DateTime @default(now())
 }

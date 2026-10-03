@@ -110,3 +110,34 @@ backend's URL), and `BACKEND_API_KEY` (matching backend's own env) in
 the host's environment settings. Create the first real login by running
 `npm run create-admin` against the deployed backend's database (or
 locally with `DATABASE_URL` pointed at production, for a one-off).
+
+## Theming
+
+Light and dark, with light as the default (the client asked for a
+light-first UI). The switch is the sun/moon control in the top bar.
+
+Mechanically: every colour resolves to a CSS variable defined in
+`app/globals.css`, which `tailwind.config.js` exposes as semantic tokens
+(`bg`, `surface`, `fg`, `accent`, `warn`). Because the variables hold bare
+`R G B` triplets wrapped in `rgb(... / <alpha-value>)`, opacity modifiers
+keep working — `text-fg/60` is correct in both themes, and no component
+needs a `dark:` variant anywhere.
+
+`lib/theme.js` holds the storage key and the inline script that sets
+`data-theme` on `<html>` before first paint. That script is what stops a
+dark-mode user seeing a white flash on every navigation; it has to stay
+inline and synchronous in `app/layout.jsx`.
+
+To make the theme follow the OS setting instead of defaulting to light,
+change `DEFAULT_THEME` in `lib/theme.js` to `'system'`.
+
+## Roles
+
+The signed-in user's role rides in the session cookie and is shared with
+client components through `components/RoleContext.jsx`. A `viewer` sees
+every tab but no write controls, and the top bar shows a "read-only" badge
+so the missing buttons are explained rather than confusing.
+
+This is presentation only. The real enforcement is in the backend (see
+`backend/README.md`), which rejects writes from viewers regardless of what
+the UI renders.

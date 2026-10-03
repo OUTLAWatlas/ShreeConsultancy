@@ -22,12 +22,16 @@ async function sendEmail({ to, subject, html, attachments = [] }) {
       to,
       subject,
       html,
-      // Resend wants raw base64 — strip a data: URI prefix if the caller
-      // passed one straight from something like jsPDF's datauristring output.
-      attachments: attachments.map((a) => ({
-        filename: a.filename,
-        content: a.content.replace(/^data:.*;base64,/, ''),
-      })),
+      // Resend takes either a `path` URL it fetches itself, or raw base64
+      // content. Support both: stored files pass a signed storage URL,
+      // while a PDF that only exists in the browser (storage not
+      // configured) has to send its bytes. The regex strips the data: URI
+      // prefix jsPDF's datauristring output carries.
+      attachments: attachments.map((a) =>
+        a.path
+          ? { filename: a.filename, path: a.path }
+          : { filename: a.filename, content: a.content.replace(/^data:.*;base64,/, '') }
+      ),
     }),
   });
 

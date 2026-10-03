@@ -61,6 +61,8 @@ npm start
 ```
 
 ## Deployment
+
+**Full step-by-step guide: [DEPLOYMENT.md](./DEPLOYMENT.md).** The summary below is orientation only.
 - **backend** needs a long-lived Node host (Railway, Render, Fly.io, a
   VM/container — a `Dockerfile` is included) and a Postgres database
   (`DATABASE_URL`).

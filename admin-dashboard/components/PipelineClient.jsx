@@ -5,6 +5,7 @@ import { formatINR } from '../lib/mockData';
 import PipelineBoard from './PipelineBoard';
 import ProjectDrawer from './ProjectDrawer';
 import NewProjectModal from './NewProjectModal';
+import { useCanWrite } from './RoleContext';
 
 // Prisma's shape (ledgerEntries, proposalGenerated, invoiceGenerated) is
 // translated to the shape the board/drawer components already expect
@@ -27,6 +28,7 @@ function toClientShape(p) {
 
 export default function PipelineClient({ initialProjects }) {
   const [projects, setProjects] = useState(initialProjects.map(toClientShape));
+  const canWrite = useCanWrite();
   const [selectedId, setSelectedId] = useState(null);
   const [syncError, setSyncError] = useState('');
   const [showNewProject, setShowNewProject] = useState(false);
@@ -111,28 +113,30 @@ export default function PipelineClient({ initialProjects }) {
   return (
     <div className="-m-6">
       {syncError && (
-        <p className="border-b border-amber/40 bg-amber/10 px-4 py-2 text-xs text-amber">
+        <p className="border-b border-warn/40 bg-warn/10 px-4 py-2 text-xs text-warn">
           {syncError}
         </p>
       )}
 
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
-        <p className="text-xs tracking-wide text-white/40">Pipeline</p>
+      <div className="flex items-center justify-between border-b border-fg/10 px-4 py-2">
+        <p className="text-xs tracking-wide text-fg/40">Pipeline</p>
+        {canWrite && (
         <button
           onClick={() => setShowNewProject(true)}
-          className="border border-white/15 px-2 py-1 text-xs text-white/60 hover:border-cyan/50 hover:text-cyan"
+          className="border border-fg/15 px-2 py-1 text-xs text-fg/60 hover:border-accent/50 hover:text-accent"
         >
           + new project
         </button>
+        )}
       </div>
 
-      <div className="grid grid-cols-2 gap-px bg-white/10 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-px bg-fg/10 sm:grid-cols-4">
         <Stat label="Open projects" value={openProjects.length} />
         <Stat label="Active pipeline value" value={formatINR(activeValue)} />
         <Stat
           label="Blocked"
           value={blockedCount}
-          accent={blockedCount > 0 ? 'amber' : undefined}
+          accent={blockedCount > 0 ? 'warn' : undefined}
         />
         <Stat label="Closed value" value={formatINR(closedValue)} />
       </div>
@@ -142,6 +146,7 @@ export default function PipelineClient({ initialProjects }) {
         onMoveStage={moveStage}
         onToggleBlocked={toggleBlocked}
         onOpenProject={setSelectedId}
+        canWrite={canWrite}
       />
 
       <ProjectDrawer
@@ -160,9 +165,9 @@ export default function PipelineClient({ initialProjects }) {
 
 function Stat({ label, value, accent }) {
   return (
-    <div className="bg-ink px-4 py-3">
-      <p className="text-[10px] tracking-wide text-white/30">{label}</p>
-      <p className={`mt-1 tabular text-lg ${accent === 'amber' ? 'text-amber' : 'text-white/90'}`}>
+    <div className="bg-bg px-4 py-3">
+      <p className="text-[10px] tracking-wide text-fg/30">{label}</p>
+      <p className={`mt-1 tabular text-lg ${accent === 'warn' ? 'text-warn' : 'text-fg/90'}`}>
         {value}
       </p>
     </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTripleClickLogo } from '../../hooks/useTripleClickLogo';
+import ThemeToggle from '../ThemeToggle';
 
 // Set NEXT_PUBLIC_ADMIN_URL in .env.local / your host's env settings.
 // Falls back to the production subdomain if unset.
@@ -33,7 +34,7 @@ export default function Navbar() {
     <header
       className={`fixed inset-x-0 top-0 z-40 transition-all duration-500 ${
         scrolled
-          ? 'border-b border-white/5 bg-[#050505]/70 backdrop-blur-xl'
+          ? 'border-b border-fg/5 bg-bg-deep/70 backdrop-blur-xl'
           : 'border-b border-transparent bg-transparent'
       }`}
     >
@@ -44,15 +45,15 @@ export default function Navbar() {
           aria-label="Shree Consultancy"
           className="group flex select-none items-center gap-3"
         >
-          <span className="relative flex h-9 w-9 items-center justify-center rounded-sm border border-[#00E5FF]/40 [transform-style:preserve-3d] transition-transform duration-700 group-hover:[transform:rotateY(180deg)]">
-            <span className="absolute inset-0 flex items-center justify-center font-mono text-sm text-[#00E5FF] [backface-visibility:hidden]">
+          <span className="relative flex h-9 w-9 items-center justify-center rounded-sm border border-accent/40 [transform-style:preserve-3d] transition-transform duration-700 group-hover:[transform:rotateY(180deg)]">
+            <span className="absolute inset-0 flex items-center justify-center font-mono text-sm text-accent [backface-visibility:hidden]">
               SC
             </span>
-            <span className="absolute inset-0 flex items-center justify-center font-mono text-sm text-[#FF7B00] [backface-visibility:hidden] [transform:rotateY(180deg)]">
+            <span className="absolute inset-0 flex items-center justify-center font-mono text-sm text-warn [backface-visibility:hidden] [transform:rotateY(180deg)]">
               ⚡
             </span>
           </span>
-          <span className="font-display text-[15px] tracking-tight text-white">
+          <span className="font-display text-[15px] tracking-tight text-fg">
             Shree Consultancy
           </span>
         </button>
@@ -62,7 +63,7 @@ export default function Navbar() {
             <li key={link.href}>
               <a
                 href={link.href}
-                className="text-sm text-white/70 transition-colors hover:text-white"
+                className="text-sm text-fg/70 transition-colors hover:text-fg"
               >
                 {link.label}
               </a>
@@ -70,12 +71,15 @@ export default function Navbar() {
           ))}
         </ul>
 
-        <a
-          href="#contact"
-          className="rounded-sm border border-[#00E5FF]/50 px-4 py-2 text-sm text-[#00E5FF] transition-colors hover:bg-[#00E5FF]/10"
-        >
-          Start a project
-        </a>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <a
+            href="#contact"
+            className="rounded-sm border border-accent/50 px-4 py-2 text-sm text-accent transition-colors hover:bg-accent/10"
+          >
+            Start a project
+          </a>
+        </div>
       </nav>
     </header>
   );

@@ -54,11 +54,11 @@ function TiltCard({ title, detail, span }) {
       ref={ref}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      className={`group relative rounded-sm border border-white/10 bg-[#0A0A0C] p-6 transition-transform duration-200 ease-out will-change-transform ${span}`}
+      className={`group relative rounded-sm border border-fg/10 bg-bg p-6 transition-transform duration-200 ease-out will-change-transform ${span}`}
     >
-      <div className="pointer-events-none absolute inset-0 rounded-sm opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-hover:bg-gradient-to-br group-hover:from-[#00E5FF]/[0.06] group-hover:to-[#FF7B00]/[0.04]" />
-      <h3 className="font-display text-lg text-white">{title}</h3>
-      <p className="mt-3 max-w-[36ch] text-sm leading-relaxed text-white/60">{detail}</p>
+      <div className="pointer-events-none absolute inset-0 rounded-sm opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-hover:bg-gradient-to-br group-hover:from-accent/[0.06] group-hover:to-warn/[0.04]" />
+      <h3 className="font-display text-lg text-fg">{title}</h3>
+      <p className="mt-3 max-w-[36ch] text-sm leading-relaxed text-fg/60">{detail}</p>
     </div>
   );
 }
@@ -69,11 +69,11 @@ export default function ServicesBento() {
       {/* ---------- Services grid ---------- */}
       <section id="services" className="mx-auto max-w-7xl scroll-mt-24 px-6 py-28 lg:px-10">
         <div className="mb-12 max-w-xl">
-          <p className="mb-3 font-mono text-xs tracking-[0.2em] text-[#00E5FF]/70">
+          <p className="mb-3 font-mono text-xs tracking-[0.2em] text-accent/70">
             SEC. 01 — SERVICES
           </p>
-          <h2 className="font-display text-3xl text-white sm:text-4xl">What we design</h2>
-          <p className="mt-4 text-white/60">
+          <h2 className="font-display text-3xl text-fg sm:text-4xl">What we design</h2>
+          <p className="mt-4 text-fg/60">
             From first estimate to good-for-construction drawings, across electrical, civil, and
             structural scopes.
           </p>
@@ -94,11 +94,11 @@ export default function ServicesBento() {
             "the bottom of the heading text" without guessing pixel values. */}
         <div className="mb-6 grid gap-8 lg:grid-cols-2">
           <div className="max-w-xl">
-            <p className="mb-3 font-mono text-xs tracking-[0.2em] text-[#00E5FF]/70">
+            <p className="mb-3 font-mono text-xs tracking-[0.2em] text-accent/70">
               SEC. 02 — TEAM
             </p>
-            <h2 className="font-display text-3xl text-white sm:text-4xl">Meet the team</h2>
-            <p className="mt-4 text-white/60">
+            <h2 className="font-display text-3xl text-fg sm:text-4xl">Meet the team</h2>
+            <p className="mt-4 text-fg/60">
               Every engagement is led personally by our founder and delivered by three named
               discipline heads — each backed by their own dedicated drafting team.
             </p>
@@ -113,50 +113,48 @@ export default function ServicesBento() {
               <PersonPhoto
                 src={founder.photo}
                 alt={founder.name}
-                accent="#00E5FF"
-                className="h-full w-full object-contain object-bottom drop-shadow-[0_20px_40px_rgba(0,229,255,0.15)]"
+                className="h-full w-full object-contain object-bottom drop-shadow-glow"
               />
             </div>
           </div>
         </div>
 
-        <div className="group relative rounded-sm border border-[#00E5FF]/20 bg-gradient-to-b from-[#0A0A0C] to-[#050505] p-8 sm:p-10">
+        <div className="group relative rounded-sm border border-accent/20 bg-gradient-to-b from-bg to-bg-deep p-8 sm:p-10">
           <div className="mb-4 h-16 w-16 lg:hidden">
             <PersonPhoto
               src={founder.photo}
               alt={founder.name}
-              accent="#00E5FF"
               className="h-full w-full object-contain object-bottom"
             />
           </div>
 
-          <p className="font-mono text-xs text-[#00E5FF]">{founder.role}</p>
-          <h3 className="mt-2 font-display text-2xl text-white">{founder.name}</h3>
-          <p className="mt-1 text-sm text-white/50">{founder.credential}</p>
+          <p className="font-mono text-xs text-accent">{founder.role}</p>
+          <h3 className="mt-2 font-display text-2xl text-fg">{founder.name}</h3>
+          <p className="mt-1 text-sm text-fg/50">{founder.credential}</p>
 
           <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-hover:mt-4 group-hover:grid-rows-[1fr]">
             <div className="overflow-hidden">
-              <p className="max-w-2xl text-sm leading-relaxed text-white/70">{founder.bio}</p>
+              <p className="max-w-2xl text-sm leading-relaxed text-fg/70">{founder.bio}</p>
             </div>
           </div>
         </div>
 
         <div className="relative mt-8">
-          <div className="absolute left-1/2 top-0 hidden h-8 w-px -translate-x-1/2 -translate-y-8 bg-white/15 lg:block" />
+          <div className="absolute left-1/2 top-0 hidden h-8 w-px -translate-x-1/2 -translate-y-8 bg-fg/15 lg:block" />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {pillars.map((p) => (
               <div
                 key={p.name}
-                className="group relative rounded-sm border border-white/10 bg-[#0A0A0C] p-6 transition-colors hover:border-[#FF7B00]/40"
+                className="group relative rounded-sm border border-fg/10 bg-bg p-6 transition-colors hover:border-warn/40"
               >
-                <p className="font-mono text-xs text-[#FF7B00]">{p.discipline}</p>
-                <h4 className="mt-2 font-display text-lg text-white">{p.name}</h4>
-                <p className="text-sm text-white/50">{p.credential}</p>
+                <p className="font-mono text-xs text-warn">{p.discipline}</p>
+                <h4 className="mt-2 font-display text-lg text-fg">{p.name}</h4>
+                <p className="text-sm text-fg/50">{p.credential}</p>
 
                 <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-hover:mt-4 group-hover:grid-rows-[1fr]">
                   <div className="overflow-hidden">
-                    <p className="text-sm leading-relaxed text-white/60">{p.focus}</p>
-                    <p className="mt-4 border-t border-white/10 pt-4 text-xs text-white/40">
+                    <p className="text-sm leading-relaxed text-fg/60">{p.focus}</p>
+                    <p className="mt-4 border-t border-fg/10 pt-4 text-xs text-fg/40">
                       Drafting — {p.draftsman}
                     </p>
                   </div>

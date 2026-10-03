@@ -1,0 +1,34 @@
+name: Tender scraper
+
+# Runs nightly at 20:30 UTC (02:00 IST). Results are upserted on
+# externalId, so re-running — including after a failed partial run — never
+# creates duplicate tenders.
+#
+# NOTE: this will find nothing until portals.js has real portal URLs and
+# selectors. It ships with placeholders on purpose; see that folder's
+# README for what to fill in and why it deliberately doesn't try to get
+# past logins or CAPTCHAs.
+on:
+  schedule:
+    - cron: '30 20 * * *'
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --omit=dev
+        working-directory: automations/tender-scraper
+      # Playwright needs its browser binary plus system libraries; --with-deps
+      # installs both on the runner.
+      - run: npx playwright install --with-deps chromium
+        working-directory: automations/tender-scraper
+      - run: npm start
+        working-directory: automations/tender-scraper
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          AUTOMATION_TOKEN: ${{ secrets.AUTOMATION_TOKEN }}

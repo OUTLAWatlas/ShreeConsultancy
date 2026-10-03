@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 
+// The backend service's URL. The form posts leads straight there —
+// cross-origin, CORS-scoped to this site's origin on the backend side —
+// without going through admin-dashboard at all.
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
 const STEPS = ['project', 'scale', 'contact'];
 
 const PROJECT_TYPES = [
@@ -23,30 +28,49 @@ export default function IntakeForm() {
     company: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
 
   const next = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setSubmitted(true);
-    // TODO: wire to a real endpoint, e.g. POST /api/leads, once the backend exists.
+    setError('');
+    setSending(true);
+
+    try {
+      const res = await fetch(`${API_URL}/leads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Something went wrong. Try again in a moment.');
+      setSubmitted(true);
+    } catch (err) {
+      // Never show the success screen on a failure — a lead that silently
+      // vanished is worse than an error the visitor can act on.
+      setError(err.message);
+    } finally {
+      setSending(false);
+    }
   }
 
   return (
     <section id="contact" className="mx-auto max-w-3xl px-6 py-28 lg:px-10">
-      <div className="rounded-sm border border-[#00E5FF]/30 bg-black font-mono text-sm text-[#00E5FF]/90 shadow-[0_0_60px_-15px_rgba(0,229,255,0.25)]">
-        <div className="flex items-center gap-2 border-b border-[#00E5FF]/20 px-4 py-3 text-white/40">
-          <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
-          <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
-          <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
+      <div className="rounded-sm border border-accent/30 bg-surface font-mono text-sm text-accent/90 shadow-glow-sm">
+        <div className="flex items-center gap-2 border-b border-accent/20 px-4 py-3 text-fg/40">
+          <span className="h-2.5 w-2.5 rounded-full bg-fg/20" />
+          <span className="h-2.5 w-2.5 rounded-full bg-fg/20" />
+          <span className="h-2.5 w-2.5 rounded-full bg-fg/20" />
           <span className="ml-2 text-xs">intake — project brief</span>
         </div>
 
         <div className="p-6 sm:p-8">
           {submitted ? (
             <p>
-              <span className="text-[#FF7B00]">$</span> brief received. we&apos;ll reply to{' '}
+              <span className="text-warn">$</span> brief received. we&apos;ll reply to{' '}
               {form.email || 'your inbox'} within one business day.
             </p>
           ) : (
@@ -54,7 +78,7 @@ export default function IntakeForm() {
               {step === 0 && (
                 <div>
                   <p className="mb-4">
-                    <span className="text-[#FF7B00]">$</span> select project type
+                    <span className="text-warn">$</span> select project type
                   </p>
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {PROJECT_TYPES.map((type) => (
@@ -64,8 +88,8 @@ export default function IntakeForm() {
                         onClick={() => setForm((f) => ({ ...f, type }))}
                         className={`rounded-sm border px-3 py-2 text-left text-xs transition-colors ${
                           form.type === type
-                            ? 'border-[#00E5FF] bg-[#00E5FF]/10 text-white'
-                            : 'border-white/15 text-white/60 hover:border-white/30'
+                            ? 'border-accent bg-accent/10 text-fg'
+                            : 'border-fg/15 text-fg/60 hover:border-fg/30'
                         }`}
                       >
                         {type}
@@ -79,7 +103,7 @@ export default function IntakeForm() {
                 <div className="space-y-6">
                   <div>
                     <p className="mb-2">
-                      <span className="text-[#FF7B00]">$</span> estimated budget — ₹
+                      <span className="text-warn">$</span> estimated budget — ₹
                       {Number(form.budget).toLocaleString('en-IN')}
                     </p>
                     <input
@@ -89,12 +113,12 @@ export default function IntakeForm() {
                       step={50000}
                       value={form.budget}
                       onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))}
-                      className="w-full accent-[#00E5FF]"
+                      className="w-full accent-accent"
                     />
                   </div>
                   <div>
                     <p className="mb-2">
-                      <span className="text-[#FF7B00]">$</span> site scale —{' '}
+                      <span className="text-warn">$</span> site scale —{' '}
                       {Number(form.sqft).toLocaleString('en-IN')} sq. ft
                     </p>
                     <input
@@ -104,7 +128,7 @@ export default function IntakeForm() {
                       step={500}
                       value={form.sqft}
                       onChange={(e) => setForm((f) => ({ ...f, sqft: e.target.value }))}
-                      className="w-full accent-[#FF7B00]"
+                      className="w-full accent-warn"
                     />
                   </div>
                 </div>
@@ -117,7 +141,7 @@ export default function IntakeForm() {
                     placeholder="name"
                     value={form.name}
                     onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                    className="rounded-sm border border-white/15 bg-transparent px-3 py-2 text-white placeholder:text-white/30 focus:border-[#00E5FF] focus:outline-none"
+                    className="rounded-sm border border-fg/15 bg-transparent px-3 py-2 text-fg placeholder:text-fg/30 focus:border-accent focus:outline-none"
                   />
                   <input
                     required
@@ -125,23 +149,25 @@ export default function IntakeForm() {
                     placeholder="email"
                     value={form.email}
                     onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                    className="rounded-sm border border-white/15 bg-transparent px-3 py-2 text-white placeholder:text-white/30 focus:border-[#00E5FF] focus:outline-none"
+                    className="rounded-sm border border-fg/15 bg-transparent px-3 py-2 text-fg placeholder:text-fg/30 focus:border-accent focus:outline-none"
                   />
                   <input
                     placeholder="company"
                     value={form.company}
                     onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
-                    className="rounded-sm border border-white/15 bg-transparent px-3 py-2 text-white placeholder:text-white/30 focus:border-[#00E5FF] focus:outline-none sm:col-span-2"
+                    className="rounded-sm border border-fg/15 bg-transparent px-3 py-2 text-fg placeholder:text-fg/30 focus:border-accent focus:outline-none sm:col-span-2"
                   />
                 </div>
               )}
+
+              {error && <p className="text-xs text-warn">{error}</p>}
 
               <div className="flex items-center justify-between pt-2">
                 <button
                   type="button"
                   onClick={back}
                   disabled={step === 0}
-                  className="text-xs text-white/40 disabled:opacity-0"
+                  className="text-xs text-fg/40 disabled:opacity-0"
                 >
                   ← back
                 </button>
@@ -150,16 +176,17 @@ export default function IntakeForm() {
                     type="button"
                     onClick={next}
                     disabled={step === 0 && !form.type}
-                    className="rounded-sm border border-[#00E5FF]/50 px-4 py-2 text-xs text-[#00E5FF] disabled:opacity-30"
+                    className="rounded-sm border border-accent/50 px-4 py-2 text-xs text-accent disabled:opacity-30"
                   >
                     continue →
                   </button>
                 ) : (
                   <button
                     type="submit"
-                    className="rounded-sm border border-[#FF7B00]/60 px-4 py-2 text-xs text-[#FF7B00]"
+                    disabled={sending}
+                    className="rounded-sm border border-warn/60 px-4 py-2 text-xs text-warn disabled:opacity-50"
                   >
-                    send brief
+                    {sending ? 'sending…' : 'send brief'}
                   </button>
                 )}
               </div>

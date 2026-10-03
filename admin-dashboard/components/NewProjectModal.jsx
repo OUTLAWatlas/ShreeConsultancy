@@ -48,11 +48,11 @@ export default function NewProjectModal({ onClose, onCreated }) {
       <form
         onSubmit={handleSubmit}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm space-y-3 border border-white/10 bg-ink p-6 text-sm"
+        className="w-full max-w-sm space-y-3 border border-fg/10 bg-bg p-6 text-sm"
       >
         <div className="mb-1 flex items-center justify-between">
-          <p className="text-xs tracking-wide text-white/40">New project</p>
-          <button type="button" onClick={onClose} className="text-xs text-white/40 hover:text-white">
+          <p className="text-xs tracking-wide text-fg/40">New project</p>
+          <button type="button" onClick={onClose} className="text-xs text-fg/40 hover:text-fg">
             close
           </button>
         </div>
@@ -62,21 +62,21 @@ export default function NewProjectModal({ onClose, onCreated }) {
           placeholder="title"
           value={form.title}
           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-          className="w-full border border-white/15 bg-transparent px-2 py-1.5 text-xs placeholder:text-white/30 focus:border-cyan focus:outline-none"
+          className="w-full border border-fg/15 bg-transparent px-2 py-1.5 text-xs placeholder:text-fg/30 focus:border-accent focus:outline-none"
         />
         <input
           required
           placeholder="client"
           value={form.client}
           onChange={(e) => setForm((f) => ({ ...f, client: e.target.value }))}
-          className="w-full border border-white/15 bg-transparent px-2 py-1.5 text-xs placeholder:text-white/30 focus:border-cyan focus:outline-none"
+          className="w-full border border-fg/15 bg-transparent px-2 py-1.5 text-xs placeholder:text-fg/30 focus:border-accent focus:outline-none"
         />
 
         <div className="flex gap-2">
           <select
             value={form.discipline}
             onChange={(e) => setForm((f) => ({ ...f, discipline: e.target.value }))}
-            className="flex-1 border border-white/15 bg-ink px-2 py-1.5 text-xs text-white/80 focus:border-cyan focus:outline-none"
+            className="flex-1 border border-fg/15 bg-bg px-2 py-1.5 text-xs text-fg/80 focus:border-accent focus:outline-none"
           >
             {DISCIPLINES.map((d) => (
               <option key={d} value={d}>
@@ -90,14 +90,14 @@ export default function NewProjectModal({ onClose, onCreated }) {
             inputMode="numeric"
             value={form.value}
             onChange={(e) => setForm((f) => ({ ...f, value: e.target.value }))}
-            className="w-28 border border-white/15 bg-transparent px-2 py-1.5 text-xs placeholder:text-white/30 focus:border-cyan focus:outline-none"
+            className="w-28 border border-fg/15 bg-transparent px-2 py-1.5 text-xs placeholder:text-fg/30 focus:border-accent focus:outline-none"
           />
         </div>
 
         <select
           value={form.stage}
           onChange={(e) => setForm((f) => ({ ...f, stage: e.target.value }))}
-          className="w-full border border-white/15 bg-ink px-2 py-1.5 text-xs text-white/80 focus:border-cyan focus:outline-none"
+          className="w-full border border-fg/15 bg-bg px-2 py-1.5 text-xs text-fg/80 focus:border-accent focus:outline-none"
         >
           {STAGES.map((s) => (
             <option key={s} value={s}>
@@ -106,12 +106,12 @@ export default function NewProjectModal({ onClose, onCreated }) {
           ))}
         </select>
 
-        {error && <p className="text-xs text-amber">{error}</p>}
+        {error && <p className="text-xs text-warn">{error}</p>}
 
         <button
           type="submit"
           disabled={saving}
-          className="w-full border border-cyan/50 px-2 py-2 text-xs text-cyan hover:bg-cyan/10 disabled:opacity-50"
+          className="w-full border border-accent/50 px-2 py-2 text-xs text-accent hover:bg-accent/10 disabled:opacity-50"
         >
           {saving ? 'creating…' : 'create project'}
         </button>

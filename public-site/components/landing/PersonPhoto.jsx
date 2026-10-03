@@ -10,7 +10,7 @@ import { useState } from 'react';
 // square headshot) so the "breaking out of the card" treatment in
 // TeamSection.jsx reads correctly — a rectangular photo with a visible
 // background edge will look like a mistake in that spot.
-export default function PersonPhoto({ src, alt, accent = '#00E5FF', className = '' }) {
+export default function PersonPhoto({ src, alt, accent = 'rgb(var(--accent))', className = '' }) {
   const [failed, setFailed] = useState(false);
 
   if (!src || failed) {

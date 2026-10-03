@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import ThemeToggle from './ThemeToggle';
 
 export default function LoginForm() {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
@@ -33,16 +34,19 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-ink font-mono text-white">
+    <div className="relative flex min-h-screen items-center justify-center bg-bg font-mono text-fg">
+      <div className="absolute right-6 top-6">
+        <ThemeToggle />
+      </div>
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 px-6">
-        <p className="text-sm text-white/60">shree-consultancy / admin — sign in</p>
+        <p className="text-sm text-fg/60">shree-consultancy / admin — sign in</p>
         <input
           required
           type="email"
           placeholder="email"
           value={credentials.email}
           onChange={(e) => setCredentials((c) => ({ ...c, email: e.target.value }))}
-          className="w-full border border-white/15 bg-transparent px-3 py-2 text-sm placeholder:text-white/30 focus:border-cyan focus:outline-none"
+          className="w-full border border-fg/15 bg-transparent px-3 py-2 text-sm placeholder:text-fg/30 focus:border-accent focus:outline-none"
         />
         <input
           required
@@ -50,13 +54,13 @@ export default function LoginForm() {
           placeholder="password"
           value={credentials.password}
           onChange={(e) => setCredentials((c) => ({ ...c, password: e.target.value }))}
-          className="w-full border border-white/15 bg-transparent px-3 py-2 text-sm placeholder:text-white/30 focus:border-cyan focus:outline-none"
+          className="w-full border border-fg/15 bg-transparent px-3 py-2 text-sm placeholder:text-fg/30 focus:border-accent focus:outline-none"
         />
-        {error && <p className="text-xs text-amber">{error}</p>}
+        {error && <p className="text-xs text-warn">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full border border-cyan/50 px-3 py-2 text-sm text-cyan hover:bg-cyan/10 disabled:opacity-50"
+          className="w-full border border-accent/50 px-3 py-2 text-sm text-accent hover:bg-accent/10 disabled:opacity-50"
         >
           {loading ? 'signing in…' : 'sign in'}
         </button>

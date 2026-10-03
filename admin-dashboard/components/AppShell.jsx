@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import ThemeToggle from './ThemeToggle';
 
 const TABS = [
   { href: '/dashboard', label: 'Pipeline' },
@@ -10,7 +11,7 @@ const TABS = [
   { href: '/team', label: 'Team' },
 ];
 
-export default function AppShell({ email, children }) {
+export default function AppShell({ email, role, children }) {
   const pathname = usePathname();
 
   async function handleLogout() {
@@ -19,10 +20,10 @@ export default function AppShell({ email, children }) {
   }
 
   return (
-    <div className="min-h-screen bg-ink text-white">
-      <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+    <div className="min-h-screen bg-bg text-fg">
+      <div className="flex items-center justify-between border-b border-fg/10 px-6 py-4">
         <div className="flex items-center gap-6">
-          <p className="text-xs tracking-wide text-white/40">
+          <p className="text-xs tracking-wide text-fg/40">
             shree-consultancy / admin{email ? ` — ${email}` : ''}
           </p>
           <nav className="flex gap-1">
@@ -34,8 +35,8 @@ export default function AppShell({ email, children }) {
                   href={tab.href}
                   className={`px-3 py-1.5 text-xs ${
                     active
-                      ? 'border border-cyan/50 text-cyan'
-                      : 'border border-transparent text-white/50 hover:text-white'
+                      ? 'border border-accent/50 text-accent'
+                      : 'border border-transparent text-fg/50 hover:text-fg'
                   }`}
                 >
                   {tab.label}
@@ -44,9 +45,19 @@ export default function AppShell({ email, children }) {
             })}
           </nav>
         </div>
-        <button onClick={handleLogout} className="text-xs text-white/50 hover:text-white">
-          sign out
-        </button>
+
+        <div className="flex items-center gap-4">
+          {/* Viewers can read every tab but every write control is hidden
+              from them, so say why rather than leaving them hunting for
+              buttons that aren't there. */}
+          {role === 'viewer' && (
+            <span className="border border-fg/15 px-2 py-0.5 text-[10px] text-fg/40">read-only</span>
+          )}
+          <ThemeToggle />
+          <button onClick={handleLogout} className="text-xs text-fg/50 hover:text-fg">
+            sign out
+          </button>
+        </div>
       </div>
 
       <div className="p-6">{children}</div>

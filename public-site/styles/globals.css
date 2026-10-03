@@ -1,8 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500&display=swap');
+/* ---------------------------------------------------------------------
+   THEME TOKENS
+
+   Stored as bare "R G B" triplets because tailwind.config.js wraps them in
+   rgb(... / <alpha-value>) — that's what keeps opacity modifiers like
+   text-fg/60 working across both themes.
+
+   The light palette isn't an inversion. This page's whole identity is a
+   dark technical instrument — glowing cyan rules, a lit globe, terminal
+   chrome — and flipping those to white produces a washed-out SaaS page.
+   So light mode re-grounds the same idea as *drafting paper*: warm
+   off-white stock, ink-dark type, and accents darkened to engineering
+   blueprint tones that hold their contrast (raw #00E5FF on white is
+   effectively illegible).
+
+   Light is the default; dark is opt-in via the toggle. See lib/theme.js.
+   --------------------------------------------------------------------- */
+
+:root,
+:root[data-theme='light'] {
+  --bg: 244 242 237; /* warm drafting paper */
+  --bg-deep: 236 233 226; /* recessed bands + hero vignette */
+  --surface: 255 255 255;
+  --fg: 20 20 20;
+  --accent: 10 110 138; /* blueprint teal */
+  --warn: 179 90 0; /* burnt amber */
+  --glow: 10 110 138 / 0.18; /* ambient glow, much softer on paper */
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: 10 10 12;
+  --bg-deep: 5 5 5;
+  --surface: 0 0 0;
+  --fg: 255 255 255;
+  --accent: 0 229 255;
+  --warn: 255 123 0;
+  --glow: 0 229 255 / 0.3;
+  color-scheme: dark;
+}
 
 :root {
   --font-display: 'Space Grotesk', sans-serif;
@@ -16,6 +57,16 @@ html {
 
 body {
   font-family: var(--font-body);
+  background-color: rgb(var(--bg));
+  color: rgb(var(--fg));
+}
+
+/* Scoped to colours only — transitioning "all" would drag layout
+   properties in and make scrolling feel heavy. The .theme-ready class is
+   added one frame after load so the first paint doesn't animate. */
+html.theme-ready body,
+html.theme-ready body * {
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
 }
 
 .font-display {
@@ -35,7 +86,9 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  html.theme-ready body,
+  html.theme-ready body * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -44,6 +97,6 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid #00e5ff;
+  outline: 2px solid rgb(var(--accent));
   outline-offset: 2px;
 }

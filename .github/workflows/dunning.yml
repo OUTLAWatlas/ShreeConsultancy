@@ -1,0 +1,31 @@
+name: Dunning (invoice reminders)
+
+# Runs once a day. The script itself decides which invoices hit a reminder
+# checkpoint today (3 days before due, on the due date, 5 days overdue), so
+# this only has to fire reliably — it is safe to run more often, and
+# skipping a day just means those reminders go out late.
+#
+# 03:30 UTC is 09:00 IST. GitHub's scheduler is best-effort and can lag by
+# several minutes under load, which is fine for this.
+on:
+  schedule:
+    - cron: '30 3 * * *'
+  workflow_dispatch: # lets you trigger a run by hand from the Actions tab
+
+jobs:
+  dunning:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --omit=dev
+        working-directory: automations/dunning
+      - run: npm start
+        working-directory: automations/dunning
+        env:
+          # Set these under Settings → Secrets and variables → Actions.
+          # AUTOMATION_TOKEN must match the backend's own value.
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          AUTOMATION_TOKEN: ${{ secrets.AUTOMATION_TOKEN }}

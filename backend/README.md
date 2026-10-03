@@ -99,3 +99,49 @@ Same items called out in admin-dashboard's README: no file storage for
 CAD files/PDFs beyond the length of one dispatch request, and the
 in-memory `/leads` rate limiter resets on restart and doesn't share
 state across multiple instances.
+
+## Roles
+
+Every `AdminUser` row carries a `role`:
+
+- `admin` — can do everything (the default).
+- `viewer` — can read every tab, cannot change anything.
+
+```bash
+npm run create-admin -- someone@example.com "their password" "Their Name" viewer
+```
+
+Enforcement is server-side, in `src/middleware/requireWriteAccess.js`: any
+non-GET request carrying `x-user-role: viewer` is rejected with 403. The
+dashboard also hides write controls for viewers, but that is only an
+affordance — hiding a button is not access control, and the middleware is
+what actually holds.
+
+`/auth/verify` is deliberately exempt: it's a POST, and a viewer still has
+to be able to sign in.
+
+## Object storage
+
+`src/storage.js` talks to any S3-compatible bucket — AWS S3 or Cloudflare
+R2 unchanged, since R2 speaks the same API. Only `STORAGE_ENDPOINT` and
+`STORAGE_REGION` differ between them.
+
+It is **optional at runtime**, not just at setup. With `STORAGE_*` blank,
+the rest of the service works normally; the file routes return 503 with a
+message saying storage isn't configured, and the dashboard shows that
+rather than breaking. Uploaded filenames are reduced to a sanitised
+basename before becoming object keys, so a hostile filename cannot climb
+out of its project prefix.
+
+Buckets stay private — downloads are short-lived signed URLs, never a
+public bucket policy.
+
+## Tests
+
+```bash
+npm test
+```
+
+Covers the pure logic worth protecting: object-key sanitisation and the
+read-only guard. No database or network needed, so CI runs it on every
+push.

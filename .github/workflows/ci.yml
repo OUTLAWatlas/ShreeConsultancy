@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A later push makes an in-flight run on the same branch irrelevant.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend — tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+        working-directory: backend
+      # Generates the Prisma client that src/db.js imports. No database is
+      # contacted — this only reads schema.prisma.
+      - run: npx prisma generate
+        working-directory: backend
+      - run: npm test
+        working-directory: backend
+
+  # Both frontends are built the same way, so one job matrix covers them —
+  # this is the check that catches the import-casing mistakes that pass on
+  # macOS and fail on Linux.
+  frontends:
+    name: Build — ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [public-site, admin-dashboard]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ${{ matrix.app }}/package-lock.json
+      - run: npm ci
+        working-directory: ${{ matrix.app }}
+      - run: npm run build
+        working-directory: ${{ matrix.app }}
+        env:
+          # Build-time placeholders only. Pages are dynamic (force-dynamic),
+          # so nothing calls the backend during the build — these just have
+          # to be present so module-level config doesn't throw.
+          BACKEND_URL: http://localhost:4000
+          BACKEND_API_KEY: ci-placeholder
+          SESSION_SECRET: ci-placeholder-secret-not-used-at-runtime
+          NEXT_PUBLIC_API_URL: http://localhost:4000
+          NEXT_PUBLIC_ADMIN_URL: http://localhost:3001

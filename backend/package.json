@@ -7,17 +7,21 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "seed": "node prisma/seed.js",
-    "create-admin": "node scripts/create-admin-user.js"
+    "create-admin": "node scripts/create-admin-user.js",
+    "test": "node --test"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
+    "@aws-sdk/client-s3": "^3.658.0",
+    "@aws-sdk/s3-request-presigner": "^3.658.0",
+    "@prisma/client": "^5.19.0",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "bcryptjs": "^2.4.3",
-    "@prisma/client": "^5.19.0"
+    "express": "^4.19.2",
+    "multer": "^2.4.0"
   },
   "devDependencies": {
     "prisma": "^5.19.0"

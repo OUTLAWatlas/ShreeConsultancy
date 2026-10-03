@@ -14,24 +14,24 @@ function ProjectCard({ project, cardRef }) {
           'translateZ(calc((var(--depth, 0.4) - 0.4) * 60px)) scale(calc(0.9 + var(--depth, 0.4) * 0.1))',
         opacity: 'calc(0.55 + var(--depth, 0.4) * 0.45)',
       }}
-      className="group relative w-[300px] shrink-0 snap-center rounded-sm border border-white/10 bg-[#0A0A0C] p-6 transition-[transform,opacity,border-color,box-shadow] duration-300 ease-out hover:z-10 hover:border-[#00E5FF]/40 hover:shadow-[0_20px_60px_-20px_rgba(0,229,255,0.3)] sm:w-[340px]"
+      className="group relative w-[300px] shrink-0 snap-center rounded-sm border border-fg/10 bg-bg p-6 transition-[transform,opacity,border-color,box-shadow] duration-300 ease-out hover:z-10 hover:border-accent/40 hover:shadow-glow sm:w-[340px]"
     >
       <div className="transition-transform duration-300 ease-out group-hover:-translate-y-1">
-        <p className="font-mono text-xs text-[#00E5FF]">
+        <p className="font-mono text-xs text-accent">
           {project.year} — {project.location}
         </p>
 
-        <h3 className="mt-3 font-display text-xl text-white">{project.company}</h3>
-        <p className="mt-1 text-sm text-white/50">
+        <h3 className="mt-3 font-display text-xl text-fg">{project.company}</h3>
+        <p className="mt-1 text-sm text-fg/50">
           {project.name}
-          {project.context && <span className="text-white/30"> · {project.context}</span>}
+          {project.context && <span className="text-fg/30"> · {project.context}</span>}
         </p>
 
         <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-hover:mt-4 group-hover:grid-rows-[1fr]">
           <div className="overflow-hidden">
-            <p className="text-sm leading-relaxed text-white/60">{project.scope}</p>
+            <p className="text-sm leading-relaxed text-fg/60">{project.scope}</p>
             {project.value && (
-              <p className="mt-3 font-mono text-[11px] text-white/30">
+              <p className="mt-3 font-mono text-[11px] text-fg/30">
                 PO value: ₹{Number(project.value).toLocaleString('en-IN')}
               </p>
             )}
@@ -161,11 +161,11 @@ export default function PortfolioCarousel() {
   return (
     <section id="work" className="scroll-mt-24 py-28">
       <div className="mx-auto mb-12 max-w-7xl px-6 lg:px-10">
-        <p className="mb-3 font-mono text-xs tracking-[0.2em] text-[#00E5FF]/70">
+        <p className="mb-3 font-mono text-xs tracking-[0.2em] text-accent/70">
           SEC. 04 — PORTFOLIO
         </p>
-        <h2 className="font-display text-3xl text-white sm:text-4xl">Work on the ground</h2>
-        <p className="mt-4 max-w-xl text-white/60">
+        <h2 className="font-display text-3xl text-fg sm:text-4xl">Work on the ground</h2>
+        <p className="mt-4 max-w-xl text-fg/60">
           The twelve largest engagements, across India, the Middle East, and Africa. Scroll or
           drag to browse, hover a card for the full scope.
         </p>

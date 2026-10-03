@@ -64,6 +64,10 @@ export async function POST(request) {
     sub: data.user.id,
     email: data.user.email,
     name: data.user.name,
+    // Carried in the signed cookie so every later request knows the role
+    // without a round trip. The cookie is HMAC-signed, so a user can't
+    // promote themselves by editing it.
+    role: data.user.role || 'admin',
   });
 
   const response = NextResponse.json({ ok: true });
